@@ -1,0 +1,12 @@
+{
+  "name": "data-warehouse",
+  "version": "1.0.0",
+  "description": "Proyecto final Acamica",
+  "main": "index.js",
+  "private": true,
+  "author": "Guillermo Leal",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^2.6.14"
+  }
+}
