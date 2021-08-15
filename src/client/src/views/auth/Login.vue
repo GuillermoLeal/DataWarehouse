@@ -72,7 +72,7 @@ export default {
         };
 
         axios
-          .post('/api/auth/login', data)
+          .post('/auth/login', data)
           .then(response => {
             const { error, message, token, user } = response.data;
             if (error) {

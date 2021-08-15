@@ -35,7 +35,9 @@ router.post(
       });
     } catch (error) {
       const errors = error.errors.map((err) => err.message);
-      res.status(500).json({ error: errors });
+      res
+        .status(200)
+        .json({ error: true, message: 'Datos enviados invalidos', errors });
     }
   }
 );
@@ -48,7 +50,7 @@ router.post('/login', validateLogin, async (req, res) => {
     const token = jwt.sign(
       {
         email: user.email,
-        role: user.roleId,
+        role: user.role,
         id: user.id,
       },
       process.env.TOKEN_SECRET

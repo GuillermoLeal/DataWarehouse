@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const { User, Order } = require('../database');
 
 const validateRegister = async (req, res, next) => {
+  if (!!!req.body.email) {
+    return res.status(200).json({ error: true, message: 'Email es requerido' });
+  }
   // Validar email y usuario unico
   const isEmailExist = await User.findOne({
     where: { email: req.body.email },
@@ -64,7 +67,7 @@ const validateToken = async (req, res, next) => {
 
 const authorizeRoleAdmin = (req, res, next) => {
   const { role } = req.auth;
-  if (role !== 1)
+  if (!role)
     return res.status(200).send({ error: true, message: 'No autorizado' });
   next();
 };

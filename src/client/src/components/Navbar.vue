@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar v-show="validate" color="primary" dark>
+  <v-app-bar v-show="validate" color="primary" dark class="pr-4">
     <v-toolbar-title>
       <v-list-item link>
         <v-list-item-avatar>
@@ -16,14 +16,8 @@
 
     <v-spacer></v-spacer>
 
-    <router-link
-      :v-if="!nav.admin || nav.admin == role"
-      :to="nav.redirect"
-      v-for="nav in navs"
-      :key="nav.title"
-    >
+    <router-link :to="nav.redirect" v-for="nav in navsUser" :key="nav.title">
       <v-btn color="transparent" class="elevation-0">
-        <v-icon left>{{ nav.icon }}</v-icon>
         {{ nav.title }}
       </v-btn>
     </router-link>
@@ -66,7 +60,7 @@ export default {
         },
         {
           title: 'Usuarios',
-          icon: 'mdi-account-group-outline',
+          icon: 'mdi-account-group',
           redirect: '/usuarios',
           admin: true
         },
@@ -83,6 +77,11 @@ export default {
     validate() {
       this.getInfoUser();
       return !(this.$route.name == 'Login' || this.$route.name == 'Error404');
+    },
+    navsUser() {
+      return this.navs.filter(
+        nav => nav.admin == false || nav.admin == this.role
+      );
     }
   },
   methods: {
@@ -91,7 +90,7 @@ export default {
       if (info) {
         this.email = info.email;
         this.fullName = `${info.name} ${info.lastname}`;
-        this.role = info.role == 1;
+        this.role = info.role;
       }
     },
     logout() {
