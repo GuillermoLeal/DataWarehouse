@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app id="inspire">
+    <v-app id="inspire" style="background-color:#f3f3f3;">
       <v-main>
         <Navbar />
         <router-view />

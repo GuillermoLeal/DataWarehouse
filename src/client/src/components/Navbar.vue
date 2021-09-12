@@ -67,7 +67,7 @@ export default {
         {
           title: 'Región / Ciudad',
           icon: 'mdi-earth',
-          redirect: '/regiones-ciudad',
+          redirect: '/regiones-ciudades',
           admin: false
         }
       ]
@@ -80,7 +80,7 @@ export default {
     },
     navsUser() {
       return this.navs.filter(
-        nav => nav.admin == false || nav.admin == this.role
+        nav => nav.admin == false || nav.admin == this.role || this.role == 3
       );
     }
   },

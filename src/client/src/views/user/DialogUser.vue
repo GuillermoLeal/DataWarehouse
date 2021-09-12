@@ -92,7 +92,7 @@
                 dense
               ></v-text-field>
             </v-col>
-            <v-col cols="12" v-if="!option">
+            <v-col cols="12">
               <v-select
                 v-model="user.role"
                 :items="profiles"

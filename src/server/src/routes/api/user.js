@@ -1,14 +1,38 @@
 const router = require('express').Router();
 const bcrypt = require('bcrypt');
-const { User } = require('../../database');
-const { authorizeRoleAdmin } = require('../../controllers/auth.controller');
+const { Sequelize, User } = require('../../database');
+const {
+  authorizeRoleAdmin,
+  validateUpdateUser,
+} = require('../../controllers/auth.controller');
+const Op = Sequelize.Op;
 
 // ? Obtener la lista de usuarios
 router.get('/', authorizeRoleAdmin, async (req, res) => {
   try {
-    const { limit, offset, sortBy, sortDesc } = req.query;
+    const { search, limit, offset, sortBy, sortDesc } = req.query;
 
     const query = {
+      where: {
+        role: { [Op.notIn]: [3] },
+        [Op.or]: [
+          {
+            name: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+          {
+            lastname: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+          {
+            email: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+        ],
+      },
       limit: Number(limit) || 10,
       offset: Number(offset) || 0,
     };
@@ -79,34 +103,19 @@ router.delete('/', authorizeRoleAdmin, async (req, res) => {
 });
 
 // ? Editar usuarios
-router.put('/', authorizeRoleAdmin, async (req, res) => {
+router.put('/', authorizeRoleAdmin, validateUpdateUser, async (req, res) => {
   try {
-    const { id, name, lastname, email } = req.body;
+    const { id, name, lastname, email, role } = req.body;
 
-    // Validar email y usuario unico
-    const isEmailExist = await User.findOne({
-      where: { email: req.body.email },
-    });
-
-    if (isEmailExist) {
-      return res
-        .status(200)
-        .json({ error: true, message: 'Email ya registrado' });
-    }
-
-    data = {
+    dataUpdateUser = {
       name,
       lastname,
       email,
+      role,
     };
-    // hash contraseña
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      data.password = await bcrypt.hash(req.body.password, salt);
-    }
 
     // editar usuario
-    const userUpdate = await User.update(data, { where: { id } });
+    const userUpdate = await User.update(dataUpdateUser, { where: { id } });
 
     if (userUpdate[0] < 1) {
       res.status(200).json({
@@ -126,29 +135,6 @@ router.put('/', authorizeRoleAdmin, async (req, res) => {
       message: 'Error al tratar de editar el usuario',
       errors,
     });
-  }
-});
-
-// ? Obtener informacion de usuario por el email
-router.get('/:email', authorizeRoleAdmin, async (req, res) => {
-  try {
-    // obtener usuario
-    const user = await User.findOne({ where: { email: req.params.email } });
-
-    if (user == null) {
-      res.status(404).json({
-        error: 'Usuario no encontrado',
-      });
-    }
-
-    const { username, fullname, address, phone, email } = user;
-
-    res.json({
-      error: null,
-      data: { username, fullname, address, phone, email },
-    });
-  } catch (error) {
-    res.json(error);
   }
 });
 

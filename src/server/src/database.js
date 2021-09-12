@@ -2,6 +2,9 @@
 const { Sequelize } = require('sequelize');
 // Importar modelos
 const UserModel = require('./models/User');
+const RegionModel = require('./models/Region');
+const CountryModel = require('./models/Country');
+const CityModel = require('./models/City');
 
 // Configuración de la conexión a la base de datos
 const { DB_USER, DB_PASSWORD, DB_DATABASE, DB_HOST, DB_FORCE } = process.env;
@@ -15,6 +18,9 @@ const sequelize = new Sequelize(DB_DATABASE, DB_USER, DB_PASSWORD, {
 
 // modelos de la base de datos
 const User = UserModel(sequelize, Sequelize);
+const Region = RegionModel(sequelize, Sequelize);
+const Country = CountryModel(sequelize, Sequelize, Region);
+const City = CityModel(sequelize, Sequelize, Country);
 
 // Sincronización de la base de datos
 sequelize
@@ -30,4 +36,7 @@ module.exports = {
   sequelize,
   Sequelize,
   User,
+  Region,
+  Country,
+  City,
 };

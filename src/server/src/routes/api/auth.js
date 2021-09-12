@@ -57,7 +57,6 @@ router.post('/login', validateLogin, async (req, res) => {
     );
 
     const { id, name, lastname, email, role } = user;
-
     res.json({
       error: false,
       message: 'Usuario logueado correctamente',

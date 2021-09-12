@@ -53,6 +53,7 @@ import axios from 'axios';
 export default {
   name: 'ListUsers',
   props: {
+    search: String,
     updateUser: Boolean,
     updateDelete: Boolean
   },
@@ -79,6 +80,12 @@ export default {
       },
       deep: true
     },
+    search: {
+      handler() {
+        this.getData();
+      },
+      deep: true
+    },
     updateUser: {
       handler() {
         if (!this.updateUser) this.getData();
@@ -100,7 +107,7 @@ export default {
 
       axios
         .get(
-          `/user?limit=${itemsPerPage}&offset=${page -
+          `/user?search=${this.search}&limit=${itemsPerPage}&offset=${page -
             1}&sortBy=${sortBy.join()}&sortDesc=${sortDesc.join()}`
         )
         .then(response => {

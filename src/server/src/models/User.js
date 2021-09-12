@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'Nombre es un campo requerido',
         },
         len: {
-          args: [1, 50],
+          args: [3, 50],
           msg: 'Nombre tiene que tener entre 3 y 50 caracteres.',
         },
       },
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'Apellido es un campo requerido',
         },
         len: {
-          args: [1, 50],
+          args: [3, 50],
           msg: 'Apellido tiene que tener entre 3 y 50 caracteres.',
         },
       },

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { User, Order } = require('../database');
+const { Sequelize, User, Order } = require('../database');
+const Op = Sequelize.Op;
 
 const validateRegister = async (req, res, next) => {
   if (!!!req.body.email) {
@@ -20,14 +21,33 @@ const validateRegister = async (req, res, next) => {
   next();
 };
 
+const validateUpdateUser = async (req, res, next) => {
+  const { id, email } = req.body;
+  // Validar email y usuario unico
+  const isEmailExist = await User.findOne({
+    where: {
+      id: { [Op.notIn]: [id] },
+      email,
+    },
+  });
+
+  if (isEmailExist) {
+    return res
+      .status(200)
+      .json({ error: true, message: 'Email ya registrado' });
+  }
+
+  next();
+};
+
 const validateLogin = async (req, res, next) => {
   const user = await User.findOne({ where: { email: req.body.email } });
 
   let validPassword = false;
-  if (!!user) {
+  if (user) {
     validPassword = await bcrypt.compare(req.body.password, user.password);
   }
-
+  // console.log('LOGIN:', user, validPassword);
   if (!user || !validPassword)
     return res.status(200).json({
       error: true,
@@ -90,6 +110,7 @@ const validateOrderUser = async (req, res, next) => {
 
 module.exports = {
   validateRegister,
+  validateUpdateUser,
   validateLogin,
   validateToken,
   authorizeRoleAdmin,

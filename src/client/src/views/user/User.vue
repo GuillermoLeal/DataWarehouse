@@ -4,9 +4,11 @@
       <v-icon size="36" color="black" left>mdi-account-group</v-icon>
       <h1>Usuarios</h1>
     </v-col>
-    <v-col cols="12" md="6" lg="4">
+    <v-col cols="12" sm="6" lg="4">
       <v-text-field
+        v-model="search"
         prepend-inner-icon="mdi-magnify"
+        background-color="white"
         placeholder="buscar..."
         hide-details
         outlined
@@ -14,7 +16,7 @@
         clearable
       ></v-text-field>
     </v-col>
-    <v-col cols="12" md="6" lg="8" class="d-flex justify-end align-center">
+    <v-col cols="12" sm="6" lg="8" class="d-flex justify-end align-center">
       <v-btn @click="addUser" color="primary" dark>
         <v-icon>mdi-plus</v-icon>
         Agregar Usuario
@@ -23,6 +25,7 @@
     <v-col cols="12">
       <!-- //? Tabla de usuarios -->
       <ListUsers
+        :search="search"
         :updateUser="dialogUser"
         :updateDelete="dialogDelete"
         @edit="editUser"
@@ -81,6 +84,7 @@ export default {
   components: { ListUsers, DialogUser },
   data() {
     return {
+      search: '',
       option: false,
       dialogUser: false,
       item: null,
