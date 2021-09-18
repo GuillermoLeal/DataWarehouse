@@ -20,7 +20,12 @@
       <v-divider></v-divider>
 
       <v-card-text class="pa-4 blue-grey lighten-5">
-        <v-form v-model="validateForm" ref="form" lazy-validation>
+        <v-form
+          @submit="postRegion"
+          v-model="validateForm"
+          ref="form"
+          lazy-validation
+        >
           <v-row>
             <v-col cols="12">
               <v-text-field
@@ -88,6 +93,7 @@ export default {
       this.$refs.form.resetValidation();
     },
     postRegion() {
+      event.preventDefault();
       this.$refs.form.validate();
       if (this.$refs.form.validate()) {
         const data = {

@@ -24,7 +24,12 @@
       <v-divider></v-divider>
 
       <v-card-text class="pa-4 blue-grey lighten-5">
-        <v-form v-model="validateForm" ref="form" lazy-validation>
+        <v-form
+          @submit="postCity"
+          v-model="validateForm"
+          ref="form"
+          lazy-validation
+        >
           <v-row>
             <v-col cols="12">
               <v-text-field
@@ -104,6 +109,7 @@ export default {
       this.$refs.form.resetValidation();
     },
     postCity() {
+      event.preventDefault();
       this.$refs.form.validate();
       if (this.$refs.form.validate()) {
         const { name } = this.form;
@@ -115,7 +121,7 @@ export default {
         // Si se está creando el pais
         if (this.create) {
           axios.post('/city', data).then(response => {
-            this.$emit('create', response.data.data);
+            this.$emit('create', response.data.data, this.country.id);
           });
         }
         // Si se está editando el pais

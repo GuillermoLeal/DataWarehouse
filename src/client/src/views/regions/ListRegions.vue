@@ -22,6 +22,7 @@
           v-for="region in regions"
           :key="region.id"
           @change="getCountrys(region.id)"
+          :id="`regionId-${region.id}`"
         >
           <v-expansion-panel-header>
             {{ region.name }}
@@ -54,6 +55,7 @@
                 v-for="country in countrys"
                 :key="country.id"
                 @change="getCities(country.id)"
+                :id="`countryId-${country.id}`"
               >
                 <v-expansion-panel-header>
                   {{ country.name }}
@@ -191,22 +193,28 @@ export default {
     createRegion(item) {
       this.regions.push(item);
     },
-    createCountry(item) {
-      this.countrys.push(item);
+    createCountry(item, regionId) {
+      const regionExpanded = document.querySelector(`#regionId-${regionId}`);
+      if (regionExpanded.classList.contains('v-item--active'))
+        this.countrys.push(item);
     },
     editCountry(item) {
-      this.countrys.find(c => c.id === item.id).name = item.name;
+      const country = this.countrys.find(c => c.id === item.id);
+      if (country) country.name = item.name;
     },
     eliminarCountry(item) {
       axios.delete('/country', { data: { id: item.id } }).then(() => {
         this.removeItemFromArr(this.countrys, item.id);
       });
     },
-    createCity(item) {
-      this.cities.push(item);
+    createCity(item, countryId) {
+      const countryExpanded = document.querySelector(`#countryId-${countryId}`);
+      if (countryExpanded.classList.contains('v-item--active'))
+        this.cities.push(item);
     },
     editCity(item) {
-      this.cities.find(c => c.id === item.id).name = item.name;
+      const city = this.cities.find(c => c.id === item.id);
+      if (city) city.name = item.name;
     },
     eliminarCity(item) {
       axios.delete('/city', { data: { id: item.id } }).then(() => {
