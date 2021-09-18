@@ -2,6 +2,27 @@ const router = require('express').Router();
 const { Sequelize, City } = require('../../database');
 const Op = Sequelize.Op;
 
+// ? Obtener cities
+router.get('/', async (req, res) => {
+  try {
+    const query = {
+      where: {
+        active: true,
+      },
+    };
+
+    const cities = await City.findAll(query);
+
+    res.json({
+      error: false,
+      totalData: cities.length,
+      data: cities,
+    });
+  } catch (error) {
+    res.json(error);
+  }
+});
+
 // ? Obtener cities por country
 router.get('/cityForCountryId', async (req, res) => {
   try {

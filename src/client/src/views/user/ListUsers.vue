@@ -37,8 +37,8 @@
     <template v-slot:item.actions="{ item }">
       <v-icon v-if="selectedItems.length">mdi-dots-horizontal</v-icon>
       <div v-else class="d-flex justify-center align-center">
-        <v-icon @click="remove(item)" left small>mdi-delete</v-icon>
         <v-icon @click="edit(item)" left small>mdi-pencil</v-icon>
+        <v-icon @click="remove(item)" left small>mdi-delete</v-icon>
       </div>
     </template>
     <template v-slot:no-data>
@@ -65,7 +65,7 @@ export default {
         { text: 'Apellido', value: 'lastname' },
         { text: 'Email', value: 'email' },
         { text: 'Perfil', value: 'role' },
-        { text: 'Acciones', align: 'center', value: 'actions' }
+        { text: 'Acciones', align: 'center', value: 'actions', sortable: false }
       ],
       items: [],
       options: {},

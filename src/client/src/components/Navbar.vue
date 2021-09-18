@@ -55,7 +55,7 @@ export default {
         {
           title: 'Compañías',
           icon: 'mdi-home-city',
-          redirect: '/compañias',
+          redirect: '/companias',
           admin: false
         },
         {
