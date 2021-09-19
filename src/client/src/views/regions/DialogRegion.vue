@@ -8,18 +8,18 @@
     </template>
 
     <v-card>
-      <v-card-title>
-        <v-icon left color="black">mdi-plus</v-icon>
+      <v-card-title class="primary white--text">
+        <v-icon left dark>mdi-plus</v-icon>
         {{ create ? 'AGREGAR REGIÓN' : 'EDITAR REGIÓN' }}
         <v-spacer></v-spacer>
         <v-btn icon @click="closeModal">
-          <v-icon color="red">mdi-close</v-icon>
+          <v-icon color="white">mdi-close</v-icon>
         </v-btn>
       </v-card-title>
 
       <v-divider></v-divider>
 
-      <v-card-text class="pa-4 blue-grey lighten-5">
+      <v-card-text class="pa-4">
         <v-form
           @submit="postRegion"
           v-model="validateForm"
@@ -47,8 +47,6 @@
           </v-row>
         </v-form>
       </v-card-text>
-
-      <v-divider></v-divider>
 
       <v-card-actions>
         <v-spacer></v-spacer>

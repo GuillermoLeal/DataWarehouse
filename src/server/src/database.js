@@ -6,6 +6,9 @@ const RegionModel = require('./models/Region');
 const CountryModel = require('./models/Country');
 const CityModel = require('./models/City');
 const CompanyModel = require('./models/Company');
+const ChannelModel = require('./models/Channel');
+const ContactModel = require('./models/Contact');
+const ContactChannelModel = require('./models/ContactChannel');
 
 // Configuración de la conexión a la base de datos
 const { DB_USER, DB_PASSWORD, DB_DATABASE, DB_HOST, DB_FORCE } = process.env;
@@ -23,6 +26,14 @@ const Region = RegionModel(sequelize, Sequelize);
 const Country = CountryModel(sequelize, Sequelize, Region);
 const City = CityModel(sequelize, Sequelize, Country);
 const Company = CompanyModel(sequelize, Sequelize, City);
+const Channel = ChannelModel(sequelize, Sequelize);
+const Contact = ContactModel(sequelize, Sequelize, Company, City);
+const ContactChannel = ContactChannelModel(
+  sequelize,
+  Sequelize,
+  Contact,
+  Channel
+);
 
 // Sincronización de la base de datos
 sequelize
@@ -42,4 +53,7 @@ module.exports = {
   Country,
   City,
   Company,
+  Channel,
+  Contact,
+  ContactChannel,
 };

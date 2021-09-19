@@ -10,20 +10,20 @@
     </template>
 
     <v-card>
-      <v-card-title>
-        <v-icon left color="black">
+      <v-card-title class="primary white--text">
+        <v-icon left dark>
           {{ create ? 'mdi-plus' : 'mdi-pencil' }}
         </v-icon>
         {{ create ? 'AGREGAR PAÍS' : 'EDITAR PAÍS' }}
         <v-spacer></v-spacer>
         <v-btn icon @click="closeModal">
-          <v-icon color="red">mdi-close</v-icon>
+          <v-icon color="white">mdi-close</v-icon>
         </v-btn>
       </v-card-title>
 
       <v-divider></v-divider>
 
-      <v-card-text class="pa-4 blue-grey lighten-5">
+      <v-card-text class="pa-4">
         <v-form
           @submit="postCountry"
           v-model="validateForm"
@@ -51,8 +51,6 @@
           </v-row>
         </v-form>
       </v-card-text>
-
-      <v-divider></v-divider>
 
       <v-card-actions>
         <v-spacer></v-spacer>

@@ -19,21 +19,8 @@ export default {
   components: { ListCompanies },
   data() {
     return {
-      search: '',
-      option: false,
-      item: null,
-      alert: false,
-      colorAlert: '',
-      message: '',
-      dialogDelete: false,
-      selectedItems: []
+      search: ''
     };
-  },
-  methods: {
-    createCompany(item) {
-      //   this.countrys.push(item);
-      console.log(item);
-    }
   }
 };
 </script>
