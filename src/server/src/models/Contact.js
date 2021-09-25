@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'Name es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'Name tiene que tener entre 3 y 50 caracteres.',
         },
       },
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'LastName es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'LastName tiene que tener entre 3 y 50 caracteres.',
         },
       },
@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'Position es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'Position tiene que tener entre 3 y 50 caracteres.',
         },
       },
@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'Email es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'Email tiene que tener entre 3 y 50 caracteres.',
         },
       },
@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'Adress es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'Adress tiene que tener entre 3 y 50 caracteres.',
         },
       },

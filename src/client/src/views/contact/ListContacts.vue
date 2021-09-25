@@ -14,7 +14,11 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" sm="6" lg="8" class="d-flex justify-end align-center">
-        <DialogContact @create="updateTable" :create="true" />
+        <DialogContact
+          :dataSelects="dataSelects"
+          @create="getData"
+          :create="true"
+        />
       </v-col>
     </v-row>
     <!-- //? LISTA DE COMAÑIAS -->
@@ -34,8 +38,19 @@
         'items-per-page-options': [5, 10, 25]
       }"
     >
+      <template v-slot:item.region="{ item }">
+        <td class="py-2 d-flex justify-center flex-column">
+          <span>{{ item.country }}</span>
+          <span class="grey--text text-small">{{ item.region }}</span>
+        </td>
+      </template>
       <template v-slot:item.actions="{ item }">
-        <DialogContact @edit="updateTable" :create="false" :company="item" />
+        <DialogContact
+          :dataSelects="dataSelects"
+          @edit="getData"
+          :create="false"
+          :company="item"
+        />
       </template>
       <template v-slot:no-data>
         No se han encontrado registros.
@@ -68,8 +83,34 @@ export default {
       items: [],
       options: {},
       totalItems: 0,
-      selectedItems: []
+      selectedItems: [],
+      dataSelects: {
+        companies: [],
+        regions: [],
+        countries: [],
+        cities: [],
+        channels: []
+      }
     };
+  },
+  created() {
+    const reqRegions = axios.get('/region');
+    const reqCountries = axios.get('/country');
+    const reqCities = axios.get('/city');
+    const reqCompanies = axios.get('/company');
+    const reqChannels = axios.get('/channel');
+
+    axios
+      .all([reqRegions, reqCountries, reqCities, reqCompanies, reqChannels])
+      .then(
+        axios.spread((...responses) => {
+          this.dataSelects.regions = responses[0].data.data;
+          this.dataSelects.countries = responses[1].data.data;
+          this.dataSelects.cities = responses[2].data.data;
+          this.dataSelects.companies = responses[3].data.data;
+          this.dataSelects.channels = responses[4].data.data;
+        })
+      );
   },
   watch: {
     options: {
@@ -107,10 +148,13 @@ export default {
         .catch(error => {
           console.log(error);
         });
-    },
-    updateTable() {
-      this.getData();
     }
   }
 };
 </script>
+
+<style scoped>
+.text-small {
+  font-size: 0.8rem;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" fullscreen hide-overlay scrollable>
+  <v-dialog v-model="dialog" fullscreen hide-overlay scrollable persistent>
     <template v-slot:activator="{ on, attrs }">
       <v-btn v-if="create" color="primary" dark v-bind="attrs" v-on="on">
         <v-icon left>mdi-plus</v-icon> agregar contacto
@@ -40,7 +40,7 @@
                         v.length <= 50 ||
                         'El nombre debe tener menos de 50 caracteres',
                       v =>
-                        v.length >= 3 ||
+                        v.length >= 1 ||
                         'El nombre debe tener más de 3 caracteres'
                     ]"
                     v-model="form.name"
@@ -58,7 +58,7 @@
                         v.length <= 50 ||
                         'El apellido debe tener menos de 50 caracteres',
                       v =>
-                        v.length >= 3 ||
+                        v.length >= 1 ||
                         'El apellido debe tener más de 3 caracteres'
                     ]"
                     v-model="form.lastname"
@@ -76,7 +76,7 @@
                         v.length <= 50 ||
                         'La cargo debe tener menos de 50 caracteres',
                       v =>
-                        v.length >= 3 ||
+                        v.length >= 1 ||
                         'La cargo debe tener más de 3 caracteres'
                     ]"
                     v-model="form.position"
@@ -90,7 +90,13 @@
                   <v-text-field
                     :rules="[
                       v => !!v || 'Campo requerido *',
-                      v => /.+@.+\..+/.test(v) || 'El email no es válido'
+                      v => /.+@.+\..+/.test(v) || 'El email no es válido',
+                      v =>
+                        v.length <= 50 ||
+                        'El email debe tener menos de 50 caracteres',
+                      v =>
+                        v.length >= 1 ||
+                        'El email debe tener más de 1 caracteres'
                     ]"
                     v-model="form.email"
                     label="Email *"
@@ -103,7 +109,7 @@
                   <v-autocomplete
                     :rules="[v => !!v || 'Campo requerido *']"
                     v-model="form.company"
-                    :items="companies"
+                    :items="dataSelects.companies"
                     item-text="name"
                     item-value="id"
                     label="Compañía *"
@@ -122,7 +128,7 @@
                 :rules="[v => !!v || 'Campo requerido *']"
                 @change="clearRegion"
                 v-model="form.region"
-                :items="regions"
+                :items="dataSelects.regions"
                 item-text="name"
                 item-value="id"
                 label="Región *"
@@ -165,7 +171,15 @@
             </v-col>
             <v-col cols="12" sm="6" md="8" lg="3">
               <v-text-field
-                :rules="[v => !!v || 'Campo requerido *']"
+                :rules="[
+                  v => !!v || 'Campo requerido *',
+                  v =>
+                    v.length <= 50 ||
+                    'La dirección debe tener menos de 50 caracteres',
+                  v =>
+                    v.length >= 1 ||
+                    'La dirección debe tener más de 1 caracteres'
+                ]"
                 v-model="form.address"
                 label="Dirección *"
                 outlined
@@ -189,18 +203,22 @@
                 v-model="channelSelect"
                 single-select
                 show-select
-                item-key="id"
+                item-key="index"
                 :headers="headers"
                 :items="form.channels"
-                class="elevation-0 transparent"
+                class="elevation-0 transparent table-channels"
                 disable-pagination
                 hide-default-footer
                 disable-sort
               >
                 <template v-slot:header.actions>
-                  <v-btn color="primary" dark>
-                    <v-icon left>mdi-plus</v-icon>
-                    agregar canal
+                  <v-btn
+                    :disabled="!validateChannel || form.channels.length == 5"
+                    @click="addChannel"
+                    color="primary"
+                    dark
+                  >
+                    <v-icon>mdi-plus</v-icon>
                   </v-btn>
                 </template>
                 <template v-slot:item="{ item, isSelected, select }">
@@ -215,12 +233,12 @@
                     </td>
                     <td>
                       <v-autocomplete
+                        @change="addNameChannel(item)"
                         v-if="isSelected"
                         :rules="[v => !!v || 'requerido *']"
-                        @change="asignarColor(item)"
                         placeholder="Seleccionar canal"
-                        v-model="item.chanelId"
-                        :items="channels"
+                        v-model="item.channelId"
+                        :items="filterChannels(item)"
                         item-text="name"
                         item-value="id"
                         hide-details
@@ -231,10 +249,18 @@
                       ></v-autocomplete>
                       <div v-else>{{ item.name }}</div>
                     </td>
-                    <td>
+                    <td class="td-account">
                       <v-text-field
                         v-if="isSelected"
-                        :rules="[v => !!v || 'requerido *']"
+                        :rules="[
+                          v => !!v || 'requerido *',
+                          v =>
+                            v.length <= 50 ||
+                            'La cuenta debe tener menos de 50 caracteres',
+                          v =>
+                            v.length >= 1 ||
+                            'La cuenta debe tener más de 1 caracteres'
+                        ]"
                         v-model="item.account"
                         placeholder="@ejemplo"
                         hide-details
@@ -242,16 +268,15 @@
                         dense
                         background-color="white"
                       ></v-text-field>
-                      <div v-else>{{ item.account }}</div>
+                      <div v-else class="div-account">{{ item.account }}</div>
                     </td>
                     <td>
                       <v-autocomplete
                         v-if="isSelected"
-                        :rules="[v => !!v || 'requerido *']"
-                        @change="asignarColor(item)"
+                        :rules="[v => !!v || v == 0 || 'requerido *']"
                         placeholder="Seleccionar canal"
                         v-model="item.preference"
-                        :items="channels"
+                        :items="preferences"
                         item-text="name"
                         item-value="id"
                         hide-details
@@ -270,9 +295,13 @@
                       </div>
                     </td>
                     <td>
-                      <v-btn color="red" dark outlined>
-                        <v-icon left>mdi-delete</v-icon>
-                        eliminar canal
+                      <v-btn
+                        @click="removerChannel(item.channelId)"
+                        color="red"
+                        dark
+                        outlined
+                      >
+                        <v-icon>mdi-delete</v-icon>
                       </v-btn>
                     </td>
                   </tr>
@@ -318,17 +347,21 @@ export default {
     company: {
       type: Object,
       default: () => ({})
+    },
+    dataSelects: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
     return {
       dialog: false,
       validateForm: true,
-      companies: [],
-      regions: [],
-      countries: [],
-      cities: [],
-      channels: [],
+      // companies: [],
+      // regions: [],
+      // countries: [],
+      // cities: [],
+      // channels: [],
       preferences: [
         {
           id: 0,
@@ -361,47 +394,29 @@ export default {
         channels: [
           // {
           //   id: 0,
-          //   chanelId: 0,
+          //   channelId: 0,
           //   name: 'facebook',
           //   account: 'guillermo.leal',
           //   preference: 1
           // },
           // {
           //   id: 1,
-          //   chanelId: 0,
+          //   channelId: 0,
           //   name: 'facebook',
           //   account: 'guillermo.leal',
           //   preference: 0
           // },
           // {
           //   id: 2,
-          //   chanelId: 0,
+          //   channelId: 0,
           //   name: 'facebook',
           //   account: 'guillermo.leal',
           //   preference: 2
           // }
         ]
-      }
+      },
+      countIndex: 0
     };
-  },
-  created() {
-    const reqRegions = axios.get('/region');
-    const reqCountries = axios.get('/country');
-    const reqCities = axios.get('/city');
-    const reqCompanies = axios.get('/company');
-    const reqChannels = axios.get('/channel');
-
-    axios
-      .all([reqRegions, reqCountries, reqCities, reqCompanies, reqChannels])
-      .then(
-        axios.spread((...responses) => {
-          this.regions = responses[0].data.data;
-          this.countries = responses[1].data.data;
-          this.cities = responses[2].data.data;
-          this.companies = responses[3].data.data;
-          this.channels = responses[4].data.data;
-        })
-      );
   },
   watch: {
     dialog: {
@@ -420,20 +435,26 @@ export default {
   },
   computed: {
     countriesFilter() {
-      return this.countries.filter(
+      return this.dataSelects.countries.filter(
         c => c.regionId === (this.form.region || null)
       );
     },
     citiesFilter() {
-      return this.cities.filter(
+      return this.dataSelects.cities.filter(
         c => c.countryId === (this.form.country || null)
       );
     },
     validateChannel() {
       let validate = true;
       if (this.channelSelect.length) {
-        const { chanelId, account } = this.channelSelect[0];
-        if (!chanelId || !account || account.trim()) validate = false;
+        const { channelId, account, preference } = this.channelSelect[0];
+        if (
+          !channelId ||
+          !account ||
+          !account.trim() ||
+          (!preference && preference !== 0)
+        )
+          validate = false;
       }
 
       return validate;
@@ -461,6 +482,12 @@ export default {
     getPreference(id) {
       return this.preferences.find(p => p.id == id);
     },
+    addNameChannel(item) {
+      const channel = this.dataSelects.channels.find(
+        c => c.id == item.channelId
+      );
+      item.name = channel.name;
+    },
     clearRegion() {
       this.form.country = null;
       this.form.city = null;
@@ -468,19 +495,52 @@ export default {
     clearCountry() {
       this.form.city = null;
     },
+    filterChannels(item) {
+      const channels = this.form.channels.map(c => c.channelId);
+      return this.dataSelects.channels.filter(
+        c => !channels.some(id => id == c.id) || item.channelId === c.id
+      );
+    },
+    addChannel() {
+      if (this.validateChannel) {
+        this.dataSelects.channelSelect = [];
+        const data = {
+          index: this.countIndex,
+          id: null,
+          channelId: 0,
+          name: '',
+          account: '',
+          preference: 0
+        };
+        this.channelSelect.unshift(data);
+        this.form.channels.unshift(data);
+        this.countIndex++;
+      }
+    },
+    removerChannel(id) {
+      const index = this.form.channels
+        .map(item => {
+          return item.channelId;
+        })
+        .indexOf(id);
+      console.log(index);
+      if (index !== -1) {
+        this.form.channels.splice(index, 1);
+      }
+    },
     postCompany() {
       this.$refs.form.validate();
       if (this.$refs.form.validate()) {
         const data = { ...this.form };
         // Si se está creando la compañía
         if (this.create) {
-          axios.post('/company', data).then(() => {
+          axios.post('/contact', data).then(() => {
             this.$emit('create');
           });
         }
         // Si se está editando la compañía
         else {
-          axios.put('/company', data).then(response => {
+          axios.put('/contact', data).then(response => {
             this.$emit('edit', response.data.data);
           });
         }
@@ -490,3 +550,18 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.table-channels {
+  max-width: 1000px;
+}
+.td-account {
+  max-width: 300px;
+}
+.div-account {
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+</style>

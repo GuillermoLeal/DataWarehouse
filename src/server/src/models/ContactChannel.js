@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes, Contact, Channel) => {
           msg: 'Account es un campo requerido',
         },
         len: {
-          args: [3, 50],
+          args: [1, 50],
           msg: 'Account tiene que tener entre 3 y 50 caracteres.',
         },
       },
