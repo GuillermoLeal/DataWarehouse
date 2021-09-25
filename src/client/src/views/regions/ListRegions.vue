@@ -143,7 +143,6 @@ export default {
   components: { DialogDelete, DialogRegion, DialogCountry, DialogCity },
   data() {
     return {
-      search: '',
       regions: [],
       countrys: [],
       cities: []
@@ -162,7 +161,7 @@ export default {
     },
     getRegions() {
       axios
-        .get(`/region?search=${this.search}`)
+        .get('/region')
         .then(response => {
           this.regions = response.data.data;
         })

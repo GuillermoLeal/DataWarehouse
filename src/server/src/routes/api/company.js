@@ -17,8 +17,8 @@ router.get('/', async (req, res) => {
       LIMIT :_limit OFFSET :_offset `;
 
     // Ajustar orden de la tabla para consultar
-    const sorts = sortBy.split(',');
-    const sortDescs = sortDesc.split(',');
+    const sorts = !!sortBy ? sortBy.split(',') : [];
+    const sortDescs = !!sortDesc ? sortDesc.split(',') : [];
 
     sorts.forEach((item, index) => {
       if (item != '') {
@@ -28,10 +28,10 @@ router.get('/', async (req, res) => {
       }
     });
 
-    // obtener usuario
+    // obtener companies
     const companies = await sequelize.query(query, {
       replacements: {
-        _search: `%${search}%`,
+        _search: `%${search || ''}%`,
         _limit: Number(limit) || 10,
         _offset: Number(offset) || 0,
       },

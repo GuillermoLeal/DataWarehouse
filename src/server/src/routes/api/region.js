@@ -1,20 +1,12 @@
 const router = require('express').Router();
-const { Sequelize, Region, Country } = require('../../database');
-const Op = Sequelize.Op;
+const { Sequelize, Region } = require('../../database');
+// const Op = Sequelize.Op;
 
-// ? Obtener la lista de regiones
+// ? Obtener regions
 router.get('/', async (req, res) => {
   try {
-    const { search } = req.query;
-    const query = {
-      where: {
-        name: {
-          [Op.like]: `%${search}%`,
-        },
-      },
-    };
+    const regions = await Region.findAll();
 
-    const regions = await Region.findAll(query);
     res.json({
       error: false,
       totalData: regions.length,

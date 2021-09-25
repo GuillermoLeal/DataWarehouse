@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes, Company, City) => {
         },
       },
     },
-    adress: {
+    address: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -120,6 +120,11 @@ module.exports = (sequelize, DataTypes, Company, City) => {
           msg: 'Interest debe ser un número entero',
         },
       },
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
   });
 };

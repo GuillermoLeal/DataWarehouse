@@ -25,6 +25,7 @@
 
       <v-card-text class="pa-4 blue-grey lighten-5">
         <v-form v-model="validateForm" ref="form" lazy-validation>
+          <!-- //? DATOS PRINCIPALES -->
           <v-card>
             <v-card-text>
               <v-row>
@@ -34,7 +35,7 @@
                 <v-col cols="12" sm="6" md="4" lg="3">
                   <v-text-field
                     :rules="[
-                      v => !!v || 'El nombre es requerido',
+                      v => !!v || 'Campo requerido *',
                       v =>
                         v.length <= 50 ||
                         'El nombre debe tener menos de 50 caracteres',
@@ -52,7 +53,7 @@
                 <v-col cols="12" sm="6" md="4" lg="3">
                   <v-text-field
                     :rules="[
-                      v => !!v || 'El apellido es requerido',
+                      v => !!v || 'Campo requerido *',
                       v =>
                         v.length <= 50 ||
                         'El apellido debe tener menos de 50 caracteres',
@@ -70,7 +71,7 @@
                 <v-col cols="12" sm="6" md="4" lg="2">
                   <v-text-field
                     :rules="[
-                      v => !!v || 'La dirección es requerido',
+                      v => !!v || 'Campo requerido *',
                       v =>
                         v.length <= 50 ||
                         'La cargo debe tener menos de 50 caracteres',
@@ -88,7 +89,7 @@
                 <v-col cols="12" sm="6" md="4" lg="2">
                   <v-text-field
                     :rules="[
-                      v => !!v || 'El email es requerido',
+                      v => !!v || 'Campo requerido *',
                       v => /.+@.+\..+/.test(v) || 'El email no es válido'
                     ]"
                     v-model="form.email"
@@ -100,7 +101,7 @@
                 </v-col>
                 <v-col cols="12" sm="6" md="4" lg="2">
                   <v-autocomplete
-                    :rules="[v => !!v || 'La compañía es requerido']"
+                    :rules="[v => !!v || 'Campo requerido *']"
                     v-model="form.company"
                     :items="companies"
                     item-text="name"
@@ -114,47 +115,59 @@
               </v-row>
             </v-card-text>
           </v-card>
+          <!-- //? DATOS SECUNDARIOS -->
           <v-row class="mt-6">
             <v-col cols="12" sm="6" md="4" lg="2">
               <v-autocomplete
+                :rules="[v => !!v || 'Campo requerido *']"
+                @change="clearRegion"
                 v-model="form.region"
                 :items="regions"
                 item-text="name"
                 item-value="id"
-                label="Región"
+                label="Región *"
                 outlined
                 dense
                 background-color="white"
+                clearable
               ></v-autocomplete>
             </v-col>
             <v-col cols="12" sm="6" md="4" lg="2">
               <v-autocomplete
+                :rules="[v => !!v || 'Campo requerido *']"
+                @change="clearCountry"
+                :disabled="!form.region"
                 v-model="form.country"
-                :items="countries"
+                :items="countriesFilter"
                 item-text="name"
                 item-value="id"
-                label="País"
+                label="País *"
                 outlined
                 dense
                 background-color="white"
+                clearable
               ></v-autocomplete>
             </v-col>
             <v-col cols="12" sm="6" md="4" lg="2">
               <v-autocomplete
+                :rules="[v => !!v || 'Campo requerido *']"
+                :disabled="!form.country"
                 v-model="form.city"
-                :items="cities"
+                :items="citiesFilter"
                 item-text="name"
                 item-value="id"
-                label="Ciudad"
+                label="Ciudad *"
                 outlined
                 dense
                 background-color="white"
+                clearable
               ></v-autocomplete>
             </v-col>
             <v-col cols="12" sm="6" md="8" lg="3">
               <v-text-field
+                :rules="[v => !!v || 'Campo requerido *']"
                 v-model="form.address"
-                label="Dirección"
+                label="Dirección *"
                 outlined
                 dense
                 background-color="white"
@@ -170,6 +183,7 @@
                 tick-size="4"
               ></v-slider>
             </v-col>
+            <!-- //? Lista de canales -->
             <v-col cols="12">
               <v-data-table
                 v-model="channelSelect"
@@ -291,7 +305,7 @@
 import axios from 'axios';
 
 export default {
-  name: 'DialogCountry',
+  name: 'DialogCreateContact',
   props: {
     textBtn: {
       type: String,
@@ -345,33 +359,49 @@ export default {
         address: '',
         interest: 0,
         channels: [
-          {
-            id: 0,
-            chanelId: 0,
-            name: 'facebook',
-            account: 'guillermo.leal',
-            preference: 1
-          },
-          {
-            id: 1,
-            chanelId: 0,
-            name: 'facebook',
-            account: 'guillermo.leal',
-            preference: 0
-          },
-          {
-            id: 2,
-            chanelId: 0,
-            name: 'facebook',
-            account: 'guillermo.leal',
-            preference: 2
-          }
+          // {
+          //   id: 0,
+          //   chanelId: 0,
+          //   name: 'facebook',
+          //   account: 'guillermo.leal',
+          //   preference: 1
+          // },
+          // {
+          //   id: 1,
+          //   chanelId: 0,
+          //   name: 'facebook',
+          //   account: 'guillermo.leal',
+          //   preference: 0
+          // },
+          // {
+          //   id: 2,
+          //   chanelId: 0,
+          //   name: 'facebook',
+          //   account: 'guillermo.leal',
+          //   preference: 2
+          // }
         ]
       }
     };
   },
   created() {
-    this.getCities();
+    const reqRegions = axios.get('/region');
+    const reqCountries = axios.get('/country');
+    const reqCities = axios.get('/city');
+    const reqCompanies = axios.get('/company');
+    const reqChannels = axios.get('/channel');
+
+    axios
+      .all([reqRegions, reqCountries, reqCities, reqCompanies, reqChannels])
+      .then(
+        axios.spread((...responses) => {
+          this.regions = responses[0].data.data;
+          this.countries = responses[1].data.data;
+          this.cities = responses[2].data.data;
+          this.companies = responses[3].data.data;
+          this.channels = responses[4].data.data;
+        })
+      );
   },
   watch: {
     dialog: {
@@ -389,6 +419,16 @@ export default {
     }
   },
   computed: {
+    countriesFilter() {
+      return this.countries.filter(
+        c => c.regionId === (this.form.region || null)
+      );
+    },
+    citiesFilter() {
+      return this.cities.filter(
+        c => c.countryId === (this.form.country || null)
+      );
+    },
     validateChannel() {
       let validate = true;
       if (this.channelSelect.length) {
@@ -400,30 +440,33 @@ export default {
     }
   },
   methods: {
-    getCities() {
-      axios
-        .get('/city')
-        .then(response => {
-          this.cities = response.data.data;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
     closeModal() {
-      this.dialog = false;
       this.form = {
         id: null,
         name: '',
-        address: '',
+        lastname: '',
+        position: '',
         email: '',
-        telephone: '',
-        city: null
+        company: null,
+        region: null,
+        country: null,
+        city: null,
+        address: '',
+        interest: 0,
+        channels: []
       };
       this.$refs.form.resetValidation();
+      this.dialog = false;
     },
     getPreference(id) {
       return this.preferences.find(p => p.id == id);
+    },
+    clearRegion() {
+      this.form.country = null;
+      this.form.city = null;
+    },
+    clearCountry() {
+      this.form.city = null;
     },
     postCompany() {
       this.$refs.form.validate();
