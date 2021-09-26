@@ -23,7 +23,6 @@ module.exports = (sequelize, DataTypes, City) => {
     address: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         notEmpty: {
           args: true,
@@ -38,7 +37,6 @@ module.exports = (sequelize, DataTypes, City) => {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         isEmail: {
           args: true,
@@ -57,7 +55,6 @@ module.exports = (sequelize, DataTypes, City) => {
     telephone: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         notEmpty: {
           args: true,

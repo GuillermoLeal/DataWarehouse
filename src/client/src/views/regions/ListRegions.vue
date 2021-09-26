@@ -75,7 +75,7 @@
                         `¿Está seguro que desea eliminar el país ${country.name}? (también se eliminaran las ciudades asociadas)`
                       "
                       :item="country"
-                      @accept="eliminarCountry(country)"
+                      @accept="deleteCountry(country)"
                     />
                     <div class="mx-4">
                       <DialogCity
@@ -118,7 +118,7 @@
                         `¿Está seguro que desea eliminar la ciudad ${city.name}?`
                       "
                       :item="city"
-                      @accept="eliminarCity(city)"
+                      @accept="deleteCity(city)"
                     />
                   </div>
                 </v-expansion-panel-content>
@@ -201,7 +201,7 @@ export default {
       const country = this.countrys.find(c => c.id === item.id);
       if (country) country.name = item.name;
     },
-    eliminarCountry(item) {
+    deleteCountry(item) {
       axios.delete('/country', { data: { id: item.id } }).then(() => {
         this.removeItemFromArr(this.countrys, item.id);
       });
@@ -215,7 +215,7 @@ export default {
       const city = this.cities.find(c => c.id === item.id);
       if (city) city.name = item.name;
     },
-    eliminarCity(item) {
+    deleteCity(item) {
       axios.delete('/city', { data: { id: item.id } }).then(() => {
         this.removeItemFromArr(this.cities, item.id);
       });

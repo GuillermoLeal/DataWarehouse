@@ -319,10 +319,10 @@
 
       <v-card-actions class="pa-6">
         <v-spacer></v-spacer>
-        <v-btn text color="red" @click="postCompany">
+        <v-btn text color="red" @click="closeModal">
           cancelar
         </v-btn>
-        <v-btn color="primary" @click="postCompany">
+        <v-btn color="primary" @click="postContact">
           guardar contacto
         </v-btn>
       </v-card-actions>
@@ -344,7 +344,7 @@ export default {
       type: Boolean,
       default: true
     },
-    company: {
+    contact: {
       type: Object,
       default: () => ({})
     },
@@ -357,11 +357,6 @@ export default {
     return {
       dialog: false,
       validateForm: true,
-      // companies: [],
-      // regions: [],
-      // countries: [],
-      // cities: [],
-      // channels: [],
       preferences: [
         {
           id: 0,
@@ -422,12 +417,39 @@ export default {
     dialog: {
       handler() {
         if (!this.create) {
-          this.form.id = this.company.id;
-          this.form.name = this.company.name;
-          this.form.address = this.company.address;
-          this.form.email = this.company.email;
-          this.form.telephone = this.company.telephone;
-          this.form.city = this.company.city;
+          axios
+            .get(`/contact/contactById?id=${this.contact.id}`)
+            .then(response => {
+              const {
+                id,
+                name,
+                lastName,
+                position,
+                email,
+                companyId,
+                regionId,
+                countryId,
+                cityId,
+                address,
+                interest,
+                channels
+              } = response.data.contact;
+
+              this.form = {
+                id,
+                name,
+                lastname: lastName,
+                position,
+                email,
+                company: companyId,
+                region: this.contact.regionId,
+                country: this.contact.countryId,
+                city: cityId,
+                address,
+                interest,
+                channels
+              };
+            });
         }
       },
       deep: true
@@ -528,17 +550,17 @@ export default {
         this.form.channels.splice(index, 1);
       }
     },
-    postCompany() {
+    postContact() {
       this.$refs.form.validate();
       if (this.$refs.form.validate()) {
         const data = { ...this.form };
-        // Si se está creando la compañía
+        // Si se está creando el contacto
         if (this.create) {
           axios.post('/contact', data).then(() => {
             this.$emit('create');
           });
         }
-        // Si se está editando la compañía
+        // Si se está editando el contacto
         else {
           axios.put('/contact', data).then(response => {
             this.$emit('edit', response.data.data);

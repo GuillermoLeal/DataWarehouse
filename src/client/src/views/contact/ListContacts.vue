@@ -14,11 +14,20 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" sm="6" lg="8" class="d-flex justify-end align-center">
-        <DialogContact
-          :dataSelects="dataSelects"
-          @create="getData"
-          :create="true"
+        <DialogDelete
+          v-if="selectedItems.length"
+          option="btn-large"
+          title="Eliminar Ciudad"
+          :text="`¿Está seguro que desea eliminar los contactos seleccionados?`"
+          @accept="deleteContacts(true)"
         />
+        <div class="ml-4">
+          <DialogContact
+            :dataSelects="dataSelects"
+            @create="getData"
+            :create="true"
+          />
+        </div>
       </v-col>
     </v-row>
     <!-- //? LISTA DE COMAÑIAS -->
@@ -38,10 +47,32 @@
         'items-per-page-options': [5, 10, 25]
       }"
     >
-      <template v-slot:item.region="{ item }">
+      <template v-slot:item.fullName="{ item }">
+        <td class="py-2 d-flex aling-center">
+          <v-icon left size="34">mdi-account-circle</v-icon>
+          <div class="d-flex justify-center flex-column">
+            <span>{{ item.fullName }}</span>
+            <span class="grey--text text-small">{{ item.email }}</span>
+          </div>
+        </td>
+      </template>
+      <template v-slot:item.country="{ item }">
         <td class="py-2 d-flex justify-center flex-column">
           <span>{{ item.country }}</span>
           <span class="grey--text text-small">{{ item.region }}</span>
+        </td>
+      </template>
+      <template v-slot:item.interest="{ item }">
+        <td class="py-2 d-flex justify-center align-center flex-column">
+          {{ item.interest }}%
+          <v-progress-linear
+            :value="item.interest"
+            class="ml-2"
+            :color="colorsLine[item.interest]"
+            background-color="grey lighten-2"
+            rounded
+          >
+          </v-progress-linear>
         </td>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -49,7 +80,15 @@
           :dataSelects="dataSelects"
           @edit="getData"
           :create="false"
-          :company="item"
+          :contact="item"
+        />
+        <DialogDelete
+          title="Eliminar Ciudad"
+          :text="
+            `¿Está seguro que desea eliminar el contacto ${item.fullName}?`
+          "
+          :item="item"
+          @accept="deleteContacts(false, item)"
         />
       </template>
       <template v-slot:no-data>
@@ -62,11 +101,13 @@
 <script>
 import axios from 'axios';
 import DialogContact from './Dialog.vue';
+import DialogDelete from '../../components/DialogDelete';
 
 export default {
-  name: 'ListCompanies',
+  name: 'ListContacts',
   components: {
-    DialogContact
+    DialogContact,
+    DialogDelete
   },
   data() {
     return {
@@ -74,7 +115,7 @@ export default {
       search: '',
       headers: [
         { text: 'Contacto', value: 'fullName' },
-        { text: 'País/Región', value: 'region' },
+        { text: 'País/Región', value: 'country' },
         { text: 'Compañía', value: 'company' },
         { text: 'Cargo', value: 'position' },
         { text: 'Interés', value: 'interest' },
@@ -90,6 +131,13 @@ export default {
         countries: [],
         cities: [],
         channels: []
+      },
+      colorsLine: {
+        0: 'grey lighten-2',
+        25: 'blue darken-1',
+        50: 'yellow darken-1',
+        75: 'orange darken-1',
+        100: 'red darken-1'
       }
     };
   },
@@ -148,6 +196,13 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    deleteContacts(multiple, item) {
+      const items = multiple ? this.selectedItems.map(i => i.id) : [item.id];
+
+      axios.delete('/contact', { data: { items } }).then(() => {
+        this.getData();
+      });
     }
   }
 };

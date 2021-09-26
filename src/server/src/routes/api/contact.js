@@ -5,24 +5,25 @@ const {
   Contact,
   ContactChannel,
 } = require('../../database');
-const Op = Sequelize.Op;
 
 // ? Obtener contact
 router.get('/', async (req, res) => {
   try {
     const { search, limit, offset, sortBy, sortDesc } = req.query;
 
-    const query = `SELECT ct.id, ct.name, ct.lastname, CONCAT(ct.name, ' ', ct.lastname) fullName,
-      ct.position, ct.email, ct.address, ct.interest, cp.name company, rgn.name region, cnt.name country
+    let query = `SELECT ct.id, CONCAT(ct.name, ' ', ct.lastname) fullName,
+      ct.position position, ct.email email, ct.interest interest, cp.name company, 
+      rgn.id regionId, rgn.name region, cnt.id countryId, cnt.name country
       FROM contacts ct
       JOIN companies cp ON cp.id = ct.companyId
       JOIN cities cty ON cty.id = ct.cityId
       JOIN countries cnt ON cnt.id = cty.countryId
       JOIN regions rgn ON rgn.id = cnt.regionId
       WHERE ct.active = 1 AND (ct.name LIKE :_search OR ct.lastname LIKE :_search 
-        OR ct.position LIKE :_search OR cp.name LIKE :_search)
-      GROUP BY ct.id
-      LIMIT :_limit OFFSET :_offset `;
+        OR ct.position LIKE :_search OR cp.name LIKE :_search OR rgn.name LIKE :_search
+        OR cnt.name LIKE :_search OR ct.email LIKE :_search)
+      GROUP BY ct.id, fullName, position, email, interest, company, regionId, region,
+        countryId, country `;
 
     // Ajustar orden de la tabla para consultar
     const sorts = !!sortBy ? sortBy.split(',') : [];
@@ -30,11 +31,16 @@ router.get('/', async (req, res) => {
 
     sorts.forEach((item, index) => {
       if (item != '') {
-        query += ` ORDER BY ${item} ${
-          sortDescs[index] == 'true' ? 'DESC' : 'ASC'
+        let concat = ',';
+        if (index == 0) concat = 'ORDER BY';
+
+        query += `${concat} ${item} ${
+          sortDescs[index] == true ? 'DESC' : 'ASC'
         } `;
       }
     });
+
+    query += 'LIMIT :_limit OFFSET :_offset';
 
     // obtener contacts
     const contacts = await sequelize.query(query, {
@@ -52,6 +58,51 @@ router.get('/', async (req, res) => {
       error: false,
       totalData: contactsTotal.length,
       data: contacts,
+    });
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+// ? Obtener contact por ID
+router.get('/contactById', async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id && id != 0) {
+      res.status(404).json({
+        error: true,
+        message: 'id no definido',
+      });
+    }
+
+    const contact = await Contact.findByPk(id);
+    let channels = [];
+    // obtener channels del contact
+    if (contact) {
+      const query = `SELECT ch.id channelId, ch.name, cc.account, cc.preference
+        FROM contact_channels cc
+        JOIN contacts ct ON ct.id = cc.contactId
+        JOIN channels ch ON ch.id = cc.channelId
+        WHERE ct.id = :_id
+        GROUP BY cc.id`;
+
+      const findChannels = await sequelize.query(query, {
+        replacements: {
+          _id: Number(id),
+        },
+        type: Sequelize.QueryTypes.SELECT,
+      });
+
+      channels = findChannels;
+    }
+
+    res.json({
+      error: false,
+      contact: {
+        ...contact.dataValues,
+        channels: channels.map((ch, index) => ({ ...ch, index })),
+      },
     });
   } catch (error) {
     res.json(error);
@@ -126,65 +177,90 @@ router.post('/', async (req, res) => {
   }
 });
 
-// // ? Actualizar city
-// router.put('/', async (req, res) => {
-//   try {
-//     const { id, name, address, email, telephone, city } = req.body;
+// ? Actualizar contact
+router.put('/', async (req, res) => {
+  try {
+    const {
+      id,
+      name,
+      lastname,
+      position,
+      email,
+      company,
+      city,
+      address,
+      interest,
+      channels,
+    } = req.body;
 
-//     const objCompany = {
-//       name: name.trim(),
-//       address: address.trim(),
-//       email: email.trim(),
-//       telephone: telephone.trim(),
-//       cityId: city,
-//     };
+    const objContact = {
+      name: name.trim(),
+      lastName: lastname.trim(),
+      position: position.trim(),
+      email: email.trim(),
+      companyId: company,
+      cityId: city,
+      address: address.trim(),
+      interest,
+    };
 
-//     // editar company
-//     const companyUpdate = await Company.update(objCompany, { where: { id } });
+    // editar contact
+    const contactUpdate = await Contact.update(objContact, { where: { id } });
 
-//     if (companyUpdate[0] < 1) {
-//       res.status(200).json({
-//         error: true,
-//         message: 'No se pudo actualizar la compañía',
-//       });
-//     }
+    if (contactUpdate[0] < 1) {
+      res.status(200).json({
+        error: true,
+        message: 'No se pudo actualizar el contacto',
+      });
+    }
 
-//     const company = await Company.findByPk(id);
+    // Ajustar los Channels del Contact
+    const contactChannelsDelete = await ContactChannel.destroy({
+      where: { contactId: id },
+    });
+    channels.forEach(async (ch) => {
+      const objChannel = {
+        contactId: id,
+        channelId: ch.channelId,
+        account: ch.account.trim(),
+        preference: 1,
+      };
 
-//     res.json({
-//       error: false,
-//       data: company,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+      const contactChannels = await ContactChannel.create(objChannel);
+    });
 
-// // ? Eliminar city
-// router.delete('/', async (req, res) => {
-//   try {
-//     const { id } = req.body;
-//     // Eliminar city
-//     const cityRemove = await City.update(
-//       { active: false },
-//       { where: { id: id } }
-//     );
+    const contact = await Contact.findByPk(id);
 
-//     if (cityRemove[0] < 1) {
-//       res.status(200).json({
-//         error: true,
-//         message: 'No se pudo eliminar la ciudad',
-//       });
-//     }
+    res.json({
+      error: false,
+      message: 'Contacto actualizado correctamente',
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-//     // Enviar respuesta
-//     res.json({
-//       error: false,
-//       message: 'Ciudad eliminada correctamente',
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+// ? Eliminar contact
+router.delete('/', async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    // Eliminar contacts
+    items.forEach(async (id) => {
+      const contactChannelsDelete = await ContactChannel.destroy({
+        where: { contactId: id },
+      });
+      const contactDelete = await Contact.destroy({ where: { id } });
+    });
+
+    // Enviar respuesta
+    res.json({
+      error: false,
+      message: 'Contactos eliminados correctamente',
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 module.exports = router;

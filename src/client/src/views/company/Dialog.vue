@@ -91,7 +91,6 @@
               <v-text-field
                 :rules="[
                   v => !!v || 'El telefono es requerido',
-                  v => /^[0-9]/.test(v) || 'El telefono no es válido',
                   v =>
                     v.length <= 10 ||
                     'El teléfono debe tener menos de 10 caracteres',

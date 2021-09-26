@@ -7,14 +7,13 @@ router.get('/', async (req, res) => {
   try {
     const { search, limit, offset, sortBy, sortDesc } = req.query;
 
-    const query = `SELECT co.name, co.address, co.email, co.telephone, co.id, 
-      ci.id AS city, ci.name AS cityName,
-      ct.id AS country, ct.name AS countryName
+    let query = `SELECT co.id, co.name name, co.address address, co.email email, co.telephone telephone,
+      ci.id city, ci.name cityName, ct.id country, ct.name countryName
       FROM companies co
       JOIN cities ci ON ci.id = co.cityId
       JOIN countries ct ON ct.id = ci.countryId
       WHERE co.active = 1 AND co.name LIKE :_search
-      LIMIT :_limit OFFSET :_offset `;
+      GROUP BY co.id, name, address, email, telephone, city, cityName, country, countryName `;
 
     // Ajustar orden de la tabla para consultar
     const sorts = !!sortBy ? sortBy.split(',') : [];
@@ -22,11 +21,16 @@ router.get('/', async (req, res) => {
 
     sorts.forEach((item, index) => {
       if (item != '') {
-        query += ` ORDER BY ${item} ${
+        let concat = ',';
+        if (index == 0) concat = 'ORDER BY';
+
+        query += ` ${concat} ${item} ${
           sortDescs[index] == 'true' ? 'DESC' : 'ASC'
         } `;
       }
     });
+
+    query += 'LIMIT :_limit OFFSET :_offset';
 
     // obtener companies
     const companies = await sequelize.query(query, {

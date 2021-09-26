@@ -1,7 +1,17 @@
 <template>
   <v-dialog v-model="dialog" width="500">
     <template v-slot:activator="{ on, attrs }">
-      <v-btn icon v-bind="attrs" v-on="on">
+      <v-btn
+        v-if="option == 'btn-large'"
+        color="red"
+        dark
+        v-bind="attrs"
+        v-on="on"
+      >
+        <v-icon left>mdi-delete</v-icon>
+        eliminar seleccionados
+      </v-btn>
+      <v-btn v-else icon v-bind="attrs" v-on="on">
         <v-icon color="red">mdi-delete</v-icon>
       </v-btn>
     </template>
@@ -41,6 +51,10 @@
 export default {
   name: 'DialogDelete',
   props: {
+    option: {
+      type: String,
+      default: ''
+    },
     title: {
       type: String,
       default: 'textBtn'
@@ -48,14 +62,6 @@ export default {
     text: {
       type: String,
       default: 'textBtn'
-    },
-    item: {
-      type: Object,
-      default: () => ({})
-    },
-    items: {
-      type: Array,
-      default: () => []
     }
   },
   data() {
@@ -69,6 +75,7 @@ export default {
     },
     accept() {
       this.$emit('accept');
+      this.dialog = false;
     }
   }
 };
