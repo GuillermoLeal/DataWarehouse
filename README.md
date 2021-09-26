@@ -44,7 +44,7 @@ Ingresa a la ruta del proyecto 'src/client' y ejecuta el siguiente comando para 
 npm install
 ```
 
-Ingresa a la ruta del proyecto 'src/serve' y ejecuta el siguiente comando para instalar las dependencias del Backend
+Ingresa a la ruta del proyecto 'src/server' y ejecuta el siguiente comando para instalar las dependencias del Backend
 
 ```
 npm install
@@ -56,7 +56,7 @@ Ejecuta los siguientes comandos en las carpetas respectivas para correr el proye
 - 'src/client' para el Front:
 npm run serve
 
--'src/serve' para el Back:
+-'src/server' para el Back:
 npm run start
 
 - Si tienes instalado nodemon en el proyecto puedes ejecutar este otro comando para el Back:
