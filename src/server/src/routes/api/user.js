@@ -108,9 +108,9 @@ router.put('/', authorizeRoleAdmin, validateUpdateUser, async (req, res) => {
     const { id, name, lastname, email, role } = req.body;
 
     dataUpdateUser = {
-      name,
-      lastname,
-      email,
+      name: name.trim(),
+      lastname: lastname.trim(),
+      email: email.trim(),
       role,
     };
 

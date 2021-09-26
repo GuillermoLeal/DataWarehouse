@@ -14,7 +14,16 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" sm="6" lg="8" class="d-flex justify-end align-center">
-        <DialogCompany @create="updateTable" :create="true" />
+        <DialogDelete
+          v-if="selectedItems.length"
+          option="btn-large"
+          title="Eliminar Compañías"
+          :text="`¿Está seguro que desea eliminar las compañías seleccionadas?`"
+          @accept="deleteCompany(true)"
+        />
+        <div class="ml-4">
+          <DialogCompany @create="getData" :create="true" />
+        </div>
       </v-col>
     </v-row>
     <!-- //? LISTA DE COMAÑIAS -->
@@ -35,7 +44,13 @@
       }"
     >
       <template v-slot:item.actions="{ item }">
-        <DialogCompany @edit="updateTable" :create="false" :company="item" />
+        <DialogCompany @edit="getData" :create="false" :company="item" />
+        <DialogDelete
+          title="Eliminar Compañía"
+          :text="`¿Está seguro que desea eliminar la compañía ${item.name}?`"
+          :item="item"
+          @accept="deleteCompany(false, item)"
+        />
       </template>
       <template v-slot:no-data>
         No se han encontrado registros.
@@ -47,11 +62,13 @@
 <script>
 import axios from 'axios';
 import DialogCompany from './Dialog.vue';
+import DialogDelete from '../../components/DialogDelete';
 
 export default {
   name: 'ListCompanies',
   components: {
-    DialogCompany
+    DialogCompany,
+    DialogDelete
   },
   data() {
     return {
@@ -108,8 +125,12 @@ export default {
           console.log(error);
         });
     },
-    updateTable() {
-      this.getData();
+    deleteCompany(multiple, item) {
+      const items = multiple ? this.selectedItems.map(i => i.id) : [item.id];
+
+      axios.delete('/company', { data: { items } }).then(() => {
+        this.getData();
+      });
     }
   }
 };

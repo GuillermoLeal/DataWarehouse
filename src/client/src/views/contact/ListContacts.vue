@@ -17,7 +17,7 @@
         <DialogDelete
           v-if="selectedItems.length"
           option="btn-large"
-          title="Eliminar Ciudad"
+          title="Eliminar Contactos"
           :text="`¿Está seguro que desea eliminar los contactos seleccionados?`"
           @accept="deleteContacts(true)"
         />
@@ -48,13 +48,13 @@
       }"
     >
       <template v-slot:item.fullName="{ item }">
-        <td class="py-2 d-flex aling-center">
+        <div class="py-2 d-flex aling-center">
           <v-icon left size="34">mdi-account-circle</v-icon>
           <div class="d-flex justify-center flex-column">
             <span>{{ item.fullName }}</span>
             <span class="grey--text text-small">{{ item.email }}</span>
           </div>
-        </td>
+        </div>
       </template>
       <template v-slot:item.country="{ item }">
         <td class="py-2 d-flex justify-center flex-column">
@@ -63,7 +63,7 @@
         </td>
       </template>
       <template v-slot:item.interest="{ item }">
-        <td class="py-2 d-flex justify-center align-center flex-column">
+        <div class="d-flex justify-center align-center flex-column">
           {{ item.interest }}%
           <v-progress-linear
             :value="item.interest"
@@ -73,7 +73,7 @@
             rounded
           >
           </v-progress-linear>
-        </td>
+        </div>
       </template>
       <template v-slot:item.actions="{ item }">
         <DialogContact

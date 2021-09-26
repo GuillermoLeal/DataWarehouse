@@ -131,27 +131,26 @@ router.put('/', async (req, res) => {
   }
 });
 
-// ? Eliminar city
+// ? Eliminar company
 router.delete('/', async (req, res) => {
   try {
-    const { id } = req.body;
-    // Eliminar city
-    const cityRemove = await City.update(
+    const { items } = req.body;
+    // Eliminar company
+    const companyRemove = await Company.update(
       { active: false },
-      { where: { id: id } }
+      { where: { id: items } }
     );
-
-    if (cityRemove[0] < 1) {
+    if (companyRemove[0] < 1) {
       res.status(200).json({
         error: true,
-        message: 'No se pudo eliminar la ciudad',
+        message: 'No se pudo eliminar las compañías',
       });
     }
 
     // Enviar respuesta
     res.json({
       error: false,
-      message: 'Ciudad eliminada correctamente',
+      message: 'Compañías eliminadas correctamente',
     });
   } catch (error) {
     console.log(error);

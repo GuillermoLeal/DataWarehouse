@@ -1,65 +1,91 @@
 <template>
-  <v-data-table
-    v-model="selectedItems"
-    item-key="id"
-    show-select
-    :loading="loading"
-    :headers="headers"
-    :items="items"
-    class="elevation-3"
-    multi-sort
-    :options.sync="options"
-    :server-items-length="totalItems"
-    :footer-props="{
-      itemsPerPageText: 'Filas por página',
-      'items-per-page-options': [5, 10, 25]
-    }"
-  >
-    <template v-slot:top>
-      <div class="d-flex justify-end">
-        <v-btn
-          @click="remove(false)"
-          v-show="selectedItems.length"
-          color="primary"
-          text
-          class="pa-6"
-        >
-          <v-icon left>mdi-delete</v-icon>
-          Eliminar usuarios
-        </v-btn>
-      </div>
-    </template>
-    <template v-slot:item.role="{ item }">
-      <td>
+  <div>
+    <v-row class="mb-4">
+      <v-col cols="12" sm="6" lg="4">
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          background-color="white"
+          placeholder="buscar..."
+          hide-details
+          outlined
+          dense
+          clearable
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" sm="6" lg="8" class="d-flex justify-end align-center">
+        <DialogDelete
+          v-if="selectedItems.length"
+          option="btn-large"
+          title="Eliminar usuarios"
+          :text="`¿Está seguro que desea eliminar los usuarios seleccionados?`"
+          @accept="deleteUsers(true)"
+        />
+        <div class="ml-4">
+          <DialogUser :roleUser="roleUser" @create="getData" :create="true" />
+        </div>
+      </v-col>
+    </v-row>
+    <!-- //? LISTA DE COMAÑIAS -->
+    <v-data-table
+      v-model="selectedItems"
+      item-key="id"
+      show-select
+      :loading="loading"
+      :headers="headers"
+      :items="items"
+      class="elevation-3"
+      multi-sort
+      :options.sync="options"
+      :server-items-length="totalItems"
+      :footer-props="{
+        itemsPerPageText: 'Filas por página',
+        'items-per-page-options': [5, 10, 25]
+      }"
+    >
+      <template v-slot:item.role="{ item }">
         {{ item.role ? 'Admin' : 'Básico' }}
-      </td>
-    </template>
-    <template v-slot:item.actions="{ item }">
-      <v-icon v-if="selectedItems.length">mdi-dots-horizontal</v-icon>
-      <div v-else class="d-flex justify-center align-center">
-        <v-icon @click="edit(item)" left small>mdi-pencil</v-icon>
-        <v-icon @click="remove(item)" left small>mdi-delete</v-icon>
-      </div>
-    </template>
-    <template v-slot:no-data>
-      No se han encontrado registros.
-    </template>
-  </v-data-table>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <DialogUser
+          :emailUser="emailUser"
+          :roleUser="roleUser"
+          @edit="getData"
+          :create="false"
+          :user="item"
+        />
+        <DialogDelete
+          v-if="emailUser !== item.email"
+          title="Eliminar Usuario"
+          :text="`¿Está seguro que desea eliminar el usuario ${item.email}?`"
+          :item="item"
+          @accept="deleteUsers(false, item)"
+        />
+      </template>
+      <template v-slot:no-data>
+        No se han encontrado registros.
+      </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
 import axios from 'axios';
+import DialogUser from './Dialog.vue';
+import DialogDelete from '../../components/DialogDelete';
 
 export default {
   name: 'ListUsers',
-  props: {
-    search: String,
-    updateUser: Boolean,
-    updateDelete: Boolean
+  components: {
+    DialogUser,
+    DialogDelete
   },
   data() {
     return {
+      emailUser: null,
+      roleUser: null,
       loading: false,
+      search: '',
       headers: [
         { text: 'Nombre', value: 'name' },
         { text: 'Apellido', value: 'lastname' },
@@ -73,6 +99,9 @@ export default {
       selectedItems: []
     };
   },
+  created() {
+    this.getInfoUser();
+  },
   watch: {
     options: {
       handler() {
@@ -85,21 +114,16 @@ export default {
         this.getData();
       },
       deep: true
-    },
-    updateUser: {
-      handler() {
-        if (!this.updateUser) this.getData();
-      },
-      deep: true
-    },
-    updateDelete: {
-      handler() {
-        if (!this.updateDelete) this.getData();
-      },
-      deep: true
     }
   },
   methods: {
+    getInfoUser() {
+      const info = JSON.parse(localStorage.getItem('user'));
+      if (info) {
+        this.emailUser = info.email;
+        this.roleUser = info.role;
+      }
+    },
     getData() {
       this.selectedItems = [];
       this.loading = true;
@@ -112,7 +136,10 @@ export default {
         )
         .then(response => {
           const { data, totalData } = response.data;
-          this.items = data;
+          this.items = data.map(u => ({
+            ...u,
+            isSelectable: u.email == this.emailUser ? false : true
+          }));
           this.totalItems = totalData;
         })
         .finally(() => {
@@ -122,17 +149,12 @@ export default {
           console.log(error);
         });
     },
-    edit(item) {
-      this.$emit('edit', { ...item });
-    },
-    remove(item) {
-      let items = null;
-      if (item) {
-        items = [{ ...item }];
-      } else {
-        items = this.selectedItems;
-      }
-      this.$emit('delete', items);
+    deleteUsers(multiple, item) {
+      const users = multiple ? this.selectedItems.map(i => i.id) : [item.id];
+
+      axios.delete('/user', { data: { users } }).then(() => {
+        this.getData();
+      });
     }
   }
 };

@@ -246,12 +246,10 @@ router.delete('/', async (req, res) => {
     const { items } = req.body;
 
     // Eliminar contacts
-    items.forEach(async (id) => {
-      const contactChannelsDelete = await ContactChannel.destroy({
-        where: { contactId: id },
-      });
-      const contactDelete = await Contact.destroy({ where: { id } });
+    const contactChannelsDelete = await ContactChannel.destroy({
+      where: { contactId: items },
     });
+    const contactDelete = await Contact.destroy({ where: { id: items } });
 
     // Enviar respuesta
     res.json({

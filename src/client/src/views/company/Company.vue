@@ -6,7 +6,7 @@
     </v-col>
     <v-col cols="12">
       <!-- //? Tabla de usuarios -->
-      <ListCompanies :search="search" />
+      <ListCompanies />
     </v-col>
   </v-row>
 </template>
@@ -16,11 +16,6 @@ import ListCompanies from './ListCompanies.vue';
 
 export default {
   name: 'User',
-  components: { ListCompanies },
-  data() {
-    return {
-      search: ''
-    };
-  }
+  components: { ListCompanies }
 };
 </script>

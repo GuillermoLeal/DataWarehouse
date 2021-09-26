@@ -18,13 +18,13 @@ router.post(
   async (req, res) => {
     // hash contraseña
     const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(req.body.password, salt);
+    const password = await bcrypt.hash(req.body.password.trim(), salt);
 
     try {
       const saveUser = await User.create({
-        name: req.body.name,
-        lastname: req.body.lastname,
-        email: req.body.email,
+        name: req.body.name.trim(),
+        lastname: req.body.lastname.trim(),
+        email: req.body.email.trim(),
         password,
         role: req.body.role,
       });
