@@ -85,6 +85,6 @@ Si desea ingresar se tienen 2 usuarios de prueba:
   email: admin@gmail.com
   password: admin123
 
-- **USER**
-  email: user@gmail.com
-  password: user123
+- **BASICO**
+  email: jhon@gmail.com
+  password: jhon123
