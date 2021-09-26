@@ -427,8 +427,6 @@ export default {
                 position,
                 email,
                 companyId,
-                regionId,
-                countryId,
                 cityId,
                 address,
                 interest,
