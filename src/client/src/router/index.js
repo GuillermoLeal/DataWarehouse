@@ -49,14 +49,18 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
+  const info = JSON.parse(localStorage.getItem('user')) || false;
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (token) {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+      if (!info.role && to.fullPath == '/usuarios') next({ path: '/error404' });
       next();
     } else {
       next({ path: '/' });
     }
   } else {
+    if (!info.role && to.fullPath == '/usuarios') next({ path: '/error404' });
     next();
   }
 });
