@@ -223,7 +223,7 @@ router.put('/', async (req, res) => {
         contactId: id,
         channelId: ch.channelId,
         account: ch.account.trim(),
-        preference: 1,
+        preference: ch.preference,
       };
 
       const contactChannels = await ContactChannel.create(objChannel);

@@ -552,6 +552,7 @@ export default {
       this.$refs.form.validate();
       if (this.$refs.form.validate()) {
         const data = { ...this.form };
+        this.channelSelect = [];
         // Si se está creando el contacto
         if (this.create) {
           axios.post('/contact', data).then(() => {
